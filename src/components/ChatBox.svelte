@@ -1,26 +1,6 @@
 <script>
-  import { onMount } from 'svelte';
-  import { getDatabase, ref, onValue } from 'firebase/database';
-
-  let messages = [];
-
-  const handleIncomingMessages = () => {
-    const database = getDatabase();
-    onValue(ref(database, 'messages'), (snapshot) => {
-      if (snapshot.exists()) {
-        const data = snapshot.val();
-        messages = Object.keys(data).map((key) => data[key]);
-
-        // Filter out messages with undefined sender names or message content
-        messages = messages.filter((message) => message.senderName && message.messageContent);
-      }
-    });
-  };
-
-  onMount(() => {
-    handleIncomingMessages();
-  });
-
+  export let messages;
+  let newMessage;
 </script>
 
 <style>
@@ -139,5 +119,10 @@
       </p>
     </div>
   {/each}
-
+  <div class="input-box">
+    <input type="text" bind:value="{newMessage}" placeholder="Type your message here..." on:keyup="{(e) => e.key === 'Enter' && handleSubmit()}" />
+    <button on:click="{handleSubmit}">Send</button>
   </div>
+  </div>
+
+  

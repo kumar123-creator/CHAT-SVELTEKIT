@@ -1,21 +1,13 @@
 <script>
-    let onlineUsers = [];
-    let hasEnteredName = false;
+  export let onlineUsers;
+</script>
 
-      // Function to handle the user submitting their name
-  const enterChat = () => {
-    if (senderName.trim() !== '') {
-      hasEnteredName = true;
-      onlineUsers = [...onlineUsers, senderName]; // Add the user to the online users list
-    }
-  };
-
-   // Function to handle the user leaving the chat
-   const leaveChat = () => {
-    hasEnteredName = false;
-    onlineUsers = onlineUsers.filter((user) => user !== senderName); // Remove the user from the online users list
-  };
-  </script>
+<div class="user-list">
+  <h3>Online Users:</h3>
+  {#each onlineUsers as user}
+  <p class="user">{user}</p>
+  {/each}
+</div>
   
   <style>
 .user-list {
@@ -77,11 +69,6 @@
 
   </style>
   
-  <div class="user-list">
-    <h3>Online Users:</h3>
-    {#each onlineUsers as user}
-      <p class="user">{user}</p>
-    {/each}
-  </div>
+  
 
   

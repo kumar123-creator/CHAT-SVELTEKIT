@@ -6,7 +6,7 @@
   import { Input, Button, Modal } from 'flowbite-svelte';
 	import ChatBox from '../components/ChatBox.svelte';
   import UserInput from '../components/UserInput.svelte';
-    import OnlineUsersList from '../components/OnlineUsersList.svelte';
+  import OnlineUsersList from '../components/OnlineUsersList.svelte';
 	
 	
 	// Firebase configuration (replace with your own values)
@@ -206,96 +206,121 @@ const sendMessage = () => {
 
   </main>
 
-
-<style>
-	main {
-	  max-width: 600px;
-	  margin: 0 auto;
-	  padding: 20px;
-	}
-  
-	h1 {
-	  text-align: center;
-	  color: #007bff;
-	}
-
-	.message {
-	  margin-bottom: 8px;
-	  padding: 8px;
-	  border-radius: 4px;
-	  background-color: #fff;
-	  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
-	}
-	
-  
-	input[type="text"] {
-	  flex: 1;
-	  padding: 10px;
-	  border: 1px solid #ccc;
-	  border-radius: 4px;
-	  margin-right: 8px;
-	}
-  
-	.Button {
-	  padding: 10px 16px;
-	  border: none;
-	  border-radius: 4px;
-	  background-color: #007bff;
-	  color: #fff;
-	  cursor: pointer;
-	  transition: background-color 0.2s ease-in-out;
-	}
-  
-	button:hover {
-	  background-color: #0056b3;
-	}
-	
-.user-list {
-    text-align: center;
-    margin-bottom: 20px;
-  }
-
-  .user {
-    margin-bottom: 5px;
-    color: #007bff;
-    font-weight: bold;
-  }
-
-  :global(body) {
+\<style>
+  /* Reset some default styles */
+  body {
     margin: 0;
     font-family: Arial, sans-serif;
     background-color: #f5f5f5;
   }
 
   main {
+    max-width: 800px;
+    margin: 0 auto;
     padding: 20px;
-    max-width: 100%;
-    display: flex;
-    flex-direction: column;
-    height: 100vh;
+  }
+
+  /* Chat App Container */
+  .chat-app {
+    background-color: #fff;
+    border-radius: 4px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+    padding: 20px;
   }
 
   h1 {
     text-align: center;
+    color: #007bff;
     margin-bottom: 20px;
-    color: darkblue;
   }
 
+  /* Join Section */
+  .join-section {
+    display: flex;
+    align-items: center;
+  }
+
+  .join-button {
+    background-color: #007bff;
+    color: #fff;
+    border: none;
+    border-radius: 4px;
+    padding: 10px 20px;
+    margin-left: 10px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+  }
+
+  .join-button:hover {
+    background-color: #0056b3;
+  }
+
+  /* Chat Container */
+  .chat-container {
+    display: flex;
+  }
+
+  /* User List */
+  .user-list {
+    width: 200px;
+    padding-right: 20px;
+    border-right: 1px solid #ccc;
+  }
+
+  .user-list h3 {
+    color: #007bff;
+    margin: 0;
+    margin-bottom: 10px;
+  }
+
+  .user {
+    margin: 0;
+    margin-bottom: 5px;
+    color: #007bff;
+    font-weight: bold;
+  }
+
+  /* Chat Box */
+  .chat-box {
+    flex: 1;
+    padding-left: 20px;
+    overflow-y: auto;
+  }
+
+  /* Message Styling */
+  .message {
+    background-color: #f5f5f5;
+    border-radius: 8px;
+    padding: 10px;
+    margin-bottom: 10px;
+  }
+
+  .message-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .message-sender {
+    color: #007bff;
+    font-weight: bold;
+    margin: 0;
+  }
+
+  .message-timestamp {
+    color: #888;
+    font-size: 12px;
+  }
+
+  .message-content {
+    margin-top: 5px;
+    margin-bottom: 5px;
+  }
+
+  /* Input Box Styling */
   .input-box {
     display: flex;
-    margin-bottom: 20px;
-    animation: slide-up 0.3s;
-  }
-
-  @keyframes slide-up {
-    from {
-      transform: translateY(50px);
-      opacity: 0;
-    }
-    to {
-      transform: translateY(0);
-      opacity: 1;
-    }
+    align-items: center;
   }
 
   .input-box input[type="text"] {
@@ -307,89 +332,22 @@ const sendMessage = () => {
     outline: none;
   }
 
-  .input-box button {
-    padding: 10px 20px;
-    border: none;
+  .send-button {
     background-color: #007bff;
     color: #fff;
+    border: none;
     border-radius: 4px;
+    padding: 10px 20px;
+    margin-left: 10px;
     cursor: pointer;
-    font-size: 16px;
     transition: background-color 0.3s;
   }
 
-  .chat-container {
-    display: flex;
-    flex: 1;
-    background-color: #fff;
-    border: 1px solid #ccc;
-    border-radius: 4px;
-    overflow: hidden;
+  .send-button:hover {
+    background-color: #0056b3;
   }
 
-  .user-list {
-    padding: 10px;
-    border-right: 1px solid #ccc;
-    width: 200px;
-  }
-
-  .user-list h3 {
-    margin: 0;
-    margin-bottom: 10px;
-    color: purple;
-  }
-
-  .user-list .user {
-    margin: 0;
-    margin-bottom: 5px;
-    color: #007bff;
-    font-weight: bold;
-  }
-
-  .chat-box {
-    display: flex;
-    flex-direction: column;
-    padding: 10px;
-    flex: 1;
-    max-height: calc(100vh - 200px); /* Adjust this value to leave space for the user-list and input-box */
-    overflow-y: auto;
-  }
-
-  .message {
-    background-color: #f5f5f5;
-    border-radius: 8px;
-    padding: 10px;
-    margin-bottom: 10px;
-    animation: fade-in 0.3s;
-  }
-
-  @keyframes fade-in {
-    from {
-      opacity: 0;
-    }
-    to {
-      opacity: 1;
-    }
-  }
-
-  .message p {
-    margin: 0;
-  }
-
-  .message-sender {
-    color: #007bff;
-    font-weight: bold;
-  }
-
-  .message-content {
-    margin-top: 5px;
-  }
-
-  .message-timestamp {
-    color: #888;
-    font-size: 12px;
-  }
-
+  /* Modal Styling */
   .modal {
     position: fixed;
     top: 0;
@@ -417,50 +375,17 @@ const sendMessage = () => {
   }
 
   .modal-close-btn {
-    padding: 8px 16px;
-    border: none;
-    border-radius: 4px;
     background-color: #007bff;
     color: #fff;
+    border: none;
+    border-radius: 4px;
+    padding: 10px 20px;
+    margin-top: 10px;
     cursor: pointer;
     transition: background-color 0.2s ease-in-out;
-    margin-top: 10px;
   }
 
   .modal-close-btn:hover {
     background-color: #0056b3;
   }
-
-  .input-box {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    margin-top: 10px;
-  }
-
-  .input-box input[type="text"] {
-    flex: 1;
-    padding: 10px;
-    border: 1px solid #ccc;
-    border-radius: 4px;
-    font-size: 16px;
-    outline: none;
-  }
-
-  .input-box button {
-    padding: 10px 20px;
-    border: none;
-    background-color: green; /* Adjust the background color as needed */
-    color: #fff;
-    border-radius: 4px;
-    cursor: pointer;
-    font-size: 16px;
-    transition: background-color 0.3s;
-  }
-
-  .input-box button:hover {
-    background-color: #0056b3;
-  }
-  
-  </style>
-  
+</style>

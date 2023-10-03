@@ -1,16 +1,14 @@
 <script>
-  import { getDatabase, ref, push } from 'firebase/database';
+  export let newMessage;
+  export let senderName;
 
-  let newMessage = '';
-  let senderName = '';
-
-  // Function to handle the user sending a new message
-  const handleSubmit = () => {
+     // Function to handle the user sending a new message
+     const handleSubmit = () => {
     if (newMessage.trim() !== '') {
       const database = getDatabase();
       const newMessageRef = push(ref(database, 'messages'), {
-        senderName,
-        messageContent: newMessage,
+        senderName: senderName, // Use the senderName from the existing code
+        messageContent: newMessage, // Use the newMessage variable
         timestamp: Date.now(),
       });
 
@@ -18,6 +16,11 @@
     }
   };
 </script>
+
+<div class="input-box">
+  <input type="text" bind:value="{newMessage}" placeholder="Type your message here..." on:keyup="{(e) => e.key === 'Enter' && handleSubmit()}" />
+  <button on:click="{handleSubmit}">Send</button>
+</div>
 
 <style>  
 	input[type="text"] {
@@ -124,7 +127,3 @@
   
 </style>
 
-<div class="input-box">
-  <input type="text" bind:value="{newMessage}" placeholder="Type your message here..." on:keyup="{(e) => e.key === 'Enter' && handleSubmit()}" />
-  <button on:click="{handleSubmit}">Send</button>
-</div>
