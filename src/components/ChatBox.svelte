@@ -196,13 +196,16 @@ onMount(() => {
   <h1>CHAT-APP</h1>
 
   {#if !hasEnteredName}
+  <div class="card">
+    <h2>WELCOME TO CHAT APP</h2>
     <div class="input-box">
-      <Input bind:value="{senderName}" placeholder=" Enter Your Name" />
+      <Input bind:value="{senderName}" placeholder="Enter Your Name" />
       <Button style='background-color:purple' on:click="{enterChat}">Join</Button>
     </div>
     {#if errorMessage}
       <p class="error-message">{errorMessage}</p> <!-- Display the error message -->
     {/if}
+  </div>
   {:else}
   <div class="top-right">
     <Button style='background-color:red; color:white;' on:click="{leaveChat}">Logout</Button>
@@ -267,6 +270,25 @@ onMount(() => {
 </main>
 
 <style>
+  .card {
+    max-width: 800px;
+    margin: 0 auto;
+    margin-top: 200px;
+    background-color: #fff;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    padding: 20px;
+    text-align: center;
+  }
+
+  .card h2 {
+    margin-top: 0;
+    color: darkblue;
+    font-size: larger;
+    font-style: italic;
+    font-weight: bold;
+  }
+
     .message.sent {
     align-self: flex-end;
     background-color: lightgreen; 
