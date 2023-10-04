@@ -88,6 +88,24 @@ onMount(() => {
   messageContent = ''; // Clear the message content after sending
 };
 
+// Function to format the timestamp based on whether it's the same day or different day
+function formatTimestamp(timestamp) {
+  const messageDate = new Date(timestamp);
+  const today = new Date();
+
+  if (
+    messageDate.getDate() === today.getDate() &&
+    messageDate.getMonth() === today.getMonth() &&
+    messageDate.getFullYear() === today.getFullYear()
+  ) {
+    // If the message was sent today, display only the time
+    return messageDate.toLocaleTimeString();
+  } else {
+    // If the message was sent on a different day, display the date and time
+    return messageDate.toLocaleString();
+  }
+}
+
 
 onMount(() => {
 	  onValue(messagesRef, (snapshot) => {
@@ -228,9 +246,10 @@ onMount(() => {
       <div class="message {message.senderName === senderName ? 'sent' : 'received'}">
           <p class="message-sender">{message.senderName}:</p>
           <p class="message-content">{message.messageContent}</p>
-          <p class="message-timestamp">
-            ({new Date(message.timestamp).toLocaleTimeString()})
-          </p>
+          <div class="message-timestamp">
+            ({formatTimestamp(message.timestamp)})
+          </div>
+          
         </div>
       {/each}
 
