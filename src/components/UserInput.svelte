@@ -1,14 +1,16 @@
 <script>
-  export let newMessage;
-  export let senderName;
+  import { getDatabase, ref, push } from 'firebase/database';
 
-     // Function to handle the user sending a new message
-     const handleSubmit = () => {
+  let newMessage = '';
+  let senderName = '';
+
+  // Function to handle the user sending a new message
+  const handleSubmit = () => {
     if (newMessage.trim() !== '') {
       const database = getDatabase();
       const newMessageRef = push(ref(database, 'messages'), {
-        senderName: senderName, // Use the senderName from the existing code
-        messageContent: newMessage, // Use the newMessage variable
+        senderName,
+        messageContent: newMessage,
         timestamp: Date.now(),
       });
 
@@ -18,10 +20,14 @@
 </script>
 
 <div class="input-box">
-  <input type="text" bind:value="{newMessage}" placeholder="Type your message here..." on:keyup="{(e) => e.key === 'Enter' && handleSubmit()}" />
+  <input
+    type="text"
+    bind:value="{newMessage}"
+    placeholder="Type your message here..."
+    on:keyup="{(e) => e.key === 'Enter' && handleSubmit()}"
+  />
   <button on:click="{handleSubmit}">Send</button>
 </div>
-
 <style>  
 	input[type="text"] {
 	  flex: 1;

@@ -31,39 +31,45 @@
     showModal = false;
   };
 
-// Function to send a new message
-const sendMessage = () => {
-    if (senderName.trim() === '') {
-      // Prevent sending messages without a sender name
-      return;
-    }
+  const sendMessage = () => {
+  if (senderName.trim() === '') {
+    // Prevent sending messages without a sender name
+    return;
+  }
 
-    // Trim the message content to remove leading and trailing spaces
-    messageContent = messageContent.trim();
+  // Trim the message content to remove leading and trailing spaces
+  messageContent = messageContent.trim();
 
-    if (messageContent === '') {
-      // Prevent sending empty messages
-      return;
-    }
+  if (messageContent === '') {
+    // Prevent sending empty messages
+    return;
+  }
 
-    // Define the maximum allowed message content length (adjust as needed)
-    const maxMessageLength = 2;
-    if (messageContent.length > maxMessageLength) {
-      // Prevent sending excessively long messages
-      // Show the modal with the error message
-      showModal = true;
-      return;
-    }
+  // Define the maximum allowed message content length (adjust as needed)
+  const maxMessageLength = 2;
+  if (messageContent.length > maxMessageLength) {
+    // Prevent sending excessively long messages
+    // Show the modal with the error message
+    showModal = true;
+    return;
+  }
 
-    const database = getDatabase();
-    const newMessageRef = push(ref(database, 'messages'), {
-      senderName,
-      messageContent,
-      timestamp: Date.now(),
-    });
+  const database = getDatabase();
+  const newMessageRef = push(ref(database, 'messages'), {
+    senderName,
+    messageContent,
+    timestamp: Date.now(),
+  });
 
-    messageContent = ''; // Clear the message content after sending
-  };
+  // Add the new message to the local messages array
+  messages = [...messages, {
+    senderName,
+    messageContent,
+    timestamp: Date.now(),
+  }];
+
+  messageContent = ''; // Clear the message content after sending
+};
 
   // Function to show a notification
   const showNotification = (message) => {
@@ -143,168 +149,144 @@ const sendMessage = () => {
   
 </script>
 
+
 <main>
-	<h1>CHAT-APP</h1>
-	{#if !hasEnteredName}
-    <!-- Enter Name Section -->
+  <h1>CHAT-APP</h1>
+
+  {#if !hasEnteredName}
     <div class="input-box">
       <Input bind:value="{senderName}" placeholder=" Enter Your Name" />
       <Button style='background-color:purple' on:click="{enterChat}">Join</Button>
     </div>
   {:else}
-    <!-- Chat Container -->
-    <div class="chat-container">
-      <!-- User List -->
-      <div class="user-list">
-        <h3>Online Users:</h3>
-        {#each onlineUsers as user}
-          <p class="user">{user}</p>
-        {/each}
-      </div>
+  <div class="chat-container">
+    <div class="user-list">
+      <h3>Online Users:</h3>
+      {#each onlineUsers as user}
+        <p class="user">{user}</p>
+      {/each}
+    </div>
 
-      <!-- Chat Box -->
-      <div class="chat-box">
-        {#each messages as message}
-          <div class="message">
-            <p class="message-sender">{message.senderName}:</p>
-            <p class="message-content">{message.messageContent}</p>
-            <p class="message-timestamp">
-              ({new Date(message.timestamp).toLocaleTimeString()})
-            </p>
-          </div>
-        {/each}
-
-        <!-- New Message Input Box -->
-        <div class="input-box">
-          <Input type="text" bind:value="{newMessage}" placeholder="Type your message here..." on:keyup="{(e) => e.key === 'Enter' && handleSubmit()}" />
-          <Button style='background-color:blue' on:click="{handleSubmit}">Send</Button>
+    <div class="chat-box">
+      {#each messages as message}
+        <div class="message">
+          <p class="message-sender">{message.senderName}:</p>
+          <p class="message-content">{message.messageContent}</p>
+          <p class="message-timestamp">
+            ({new Date(message.timestamp).toLocaleTimeString()})
+          </p>
         </div>
+      {/each}
+
+      <div class="input-box">
+        <Input
+          type="text"
+          bind:value="{newMessage}"
+          placeholder="Type your message here..."
+          on:keyup="{(e) => e.key === 'Enter' && handleSubmit()}"
+        />
+        <Button style='background-color:blue' on:click="{handleSubmit}">Send</Button>
       </div>
     </div>
+  </div>
   {/if}
 
   {#if showModal}
-  <!-- Replace modal content -->
-  <Modal on:close="{closeModal}">
-    <div slot="header">Error</div>
-    <div slot="body" class="modal-content">
-      <p class="error-message">
-        {#if senderName.trim() === ''}
-          Please enter your name.
-        {:else}
-          {#if messageContent.trim() === ''}
-            Please enter a message.
+    <!-- Replace modal content -->
+    <Modal on:close="{closeModal}">
+      <div slot="header">Error</div>
+      <div slot="body" class="modal-content">
+        <p class="error-message">
+          {#if senderName.trim() === ''}
+            Please enter your name.
           {:else}
-            Message exceeds the maximum length.
+            {#if messageContent.trim() === ''}
+              Please enter a message.
+            {:else}
+              Message exceeds the maximum length.
+            {/if}
           {/if}
-        {/if}
-      </p>
-      <Button slot="footer" class="modal-close-btn" on:click="{closeModal}">OK</Button>
-    </div>
-  </Modal>
-{/if}
+        </p>
+        <Button slot="footer" class="modal-close-btn" on:click="{closeModal}">OK</Button>
+      </div>
+    </Modal>
+  {/if}
+</main>
 
-  </main>
-
-\<style>
-  /* Reset some default styles */
-  body {
-    margin: 0;
-    font-family: Arial, sans-serif;
-    background-color: #f5f5f5;
-  }
-
+<style>
   main {
-    max-width: 800px;
-    margin: 0 auto;
-    padding: 20px;
-  }
-
-  /* Chat App Container */
-  .chat-app {
-    background-color: #fff;
-    border-radius: 4px;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
-    padding: 20px;
+    max-width: 100%;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
   }
 
   h1 {
     text-align: center;
-    color: #007bff;
-    margin-bottom: 20px;
+    margin: 0;
+    padding: 10px;
+    background-color: #075e54;
+    color: white;
   }
 
-  /* Join Section */
-  .join-section {
-    display: flex;
-    align-items: center;
-  }
-
-  .join-button {
-    background-color: #007bff;
-    color: #fff;
-    border: none;
-    border-radius: 4px;
-    padding: 10px 20px;
-    margin-left: 10px;
-    cursor: pointer;
-    transition: background-color 0.3s;
-  }
-
-  .join-button:hover {
-    background-color: #0056b3;
-  }
-
-  /* Chat Container */
   .chat-container {
-    display: flex;
-  }
-
-  /* User List */
-  .user-list {
-    width: 200px;
-    padding-right: 20px;
-    border-right: 1px solid #ccc;
-  }
-
-  .user-list h3 {
-    color: #007bff;
-    margin: 0;
-    margin-bottom: 10px;
-  }
-
-  .user {
-    margin: 0;
-    margin-bottom: 5px;
-    color: #007bff;
-    font-weight: bold;
-  }
-
-  /* Chat Box */
-  .chat-box {
     flex: 1;
-    padding-left: 20px;
+    display: flex;
+    background-color: #f0f0f0;
+  }
+
+  .user-list {
+    padding: 20px;
+    min-width: 250px;
+    max-width: 250px;
+    background-color: #075e54;
+    color: white;
     overflow-y: auto;
   }
 
-  /* Message Styling */
-  .message {
-    background-color: #f5f5f5;
-    border-radius: 8px;
-    padding: 10px;
+  .user-list h3 {
+    margin: 0;
     margin-bottom: 10px;
+    font-size: 18px;
   }
 
-  .message-header {
+  .user-list .user {
+    margin: 0;
+    margin-bottom: 5px;
+    font-size: 16px;
+  }
+
+  .chat-box {
+    flex: 1;
     display: flex;
-    justify-content: space-between;
-    align-items: center;
+    flex-direction: column;
+    padding: 20px;
+    background-color: #f0f0f0;
+    overflow-y: auto;
+  }
+
+  .message {
+    max-width: 70%;
+    margin-bottom: 20px;
+    padding: 10px;
+    border-radius: 10px;
+    background-color: #fff;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  }
+
+  .message p {
+    margin: 0;
+    font-size: 16px;
   }
 
   .message-sender {
-    color: #007bff;
+    color: #075e54;
     font-weight: bold;
-    margin: 0;
+  }
+
+  .message-content {
+    margin-top: 5px;
   }
 
   .message-timestamp {
@@ -312,42 +294,36 @@ const sendMessage = () => {
     font-size: 12px;
   }
 
-  .message-content {
-    margin-top: 5px;
-    margin-bottom: 5px;
-  }
-
-  /* Input Box Styling */
   .input-box {
     display: flex;
     align-items: center;
+    background-color: #fff;
+    border-top: 1px solid #ccc;
+    padding: 10px;
   }
 
   .input-box input[type="text"] {
     flex: 1;
     padding: 10px;
-    border: 1px solid #ccc;
-    border-radius: 4px;
-    font-size: 16px;
-    outline: none;
-  }
-
-  .send-button {
-    background-color: #007bff;
-    color: #fff;
     border: none;
-    border-radius: 4px;
+    border-radius: 0;
+    font-size: 16px;
+  }
+
+  .input-box button {
     padding: 10px 20px;
-    margin-left: 10px;
+    border: none;
+    background-color: #075e54;
+    color: white;
     cursor: pointer;
-    transition: background-color 0.3s;
+    font-size: 16px;
   }
 
-  .send-button:hover {
-    background-color: #0056b3;
+  .input-box button:hover {
+    background-color: #128c7e;
   }
 
-  /* Modal Styling */
+  /* Style for the modal (you can adjust this as needed) */
   .modal {
     position: fixed;
     top: 0;
@@ -365,7 +341,7 @@ const sendMessage = () => {
     background-color: #fff;
     padding: 20px;
     border-radius: 4px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
     max-width: 400px;
   }
 
@@ -375,17 +351,17 @@ const sendMessage = () => {
   }
 
   .modal-close-btn {
-    background-color: #007bff;
-    color: #fff;
+    padding: 8px 16px;
     border: none;
     border-radius: 4px;
-    padding: 10px 20px;
-    margin-top: 10px;
+    background-color: #075e54;
+    color: white;
     cursor: pointer;
     transition: background-color 0.2s ease-in-out;
+    margin-top: 10px;
   }
 
   .modal-close-btn:hover {
-    background-color: #0056b3;
+    background-color: #128c7e;
   }
 </style>

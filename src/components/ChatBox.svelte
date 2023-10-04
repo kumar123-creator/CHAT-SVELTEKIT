@@ -3,6 +3,17 @@
   let newMessage;
 </script>
 
+<div class="chat-box">
+  {#each messages as message (message.timestamp)}
+    <div class="message">
+      <p class="message-sender">{message.senderName}:</p>
+      <p class="message-content">{message.messageContent}</p>
+      <p class="message-timestamp">
+        ({new Date(message.timestamp).toLocaleTimeString()})
+      </p>
+    </div>
+  {/each}
+</div>
 <style>
 
 	.message {
@@ -109,20 +120,5 @@
 
 </style>
 
-<div class="chat-box">
-  {#each messages as message}
-    <div class="message">
-      <p class="message-sender">{message.senderName}:</p>
-      <p class="message-content">{message.messageContent}</p>
-      <p class="message-timestamp">
-        ({new Date(message.timestamp).toLocaleTimeString()})
-      </p>
-    </div>
-  {/each}
-  <div class="input-box">
-    <input type="text" bind:value="{newMessage}" placeholder="Type your message here..." on:keyup="{(e) => e.key === 'Enter' && handleSubmit()}" />
-    <button on:click="{handleSubmit}">Send</button>
-  </div>
-  </div>
 
   
