@@ -1,107 +1,346 @@
 <script>
-  export let messages;
-  let newMessage;
-</script>
-
-<div class="chat-box">
-  {#each messages as message (message.timestamp)}
-    <div class="message">
-      <p class="message-sender">{message.senderName}:</p>
-      <p class="message-content">{message.messageContent}</p>
-      <p class="message-timestamp">
-        ({new Date(message.timestamp).toLocaleTimeString()})
-      </p>
-    </div>
-  {/each}
-</div>
-<style>
-
-	.message {
-	  margin-bottom: 8px;
-	  padding: 8px;
-	  border-radius: 4px;
-	  background-color: #fff;
-	  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
-	}
+	import { onMount } from 'svelte';
+	import { initializeApp } from 'firebase/app';
+	import { getDatabase, ref, push, onValue } from 'firebase/database';
+  import 'flowbite/dist/flowbite.css';
+  import { Input, Button, Modal } from 'flowbite-svelte';
 	
-  
-	input[type="text"] {
-	  flex: 1;
-	  padding: 10px;
-	  border: 1px solid #ccc;
-	  border-radius: 4px;
-	  margin-right: 8px;
-	}
-  
-	button {
-	  padding: 10px 16px;
-	  border: none;
-	  border-radius: 4px;
-	  background-color: #007bff;
-	  color: #fff;
-	  cursor: pointer;
-	  transition: background-color 0.2s ease-in-out;
-	}
-  
+	// Firebase configuration (replace with your own values)
+	const firebaseConfig = {
+	  apiKey: 'AIzaSyCKmOylWL1JPX8SRtShn2Cx1QaqmcDERaM',
+	  databaseURL: 'https://chat-app-dd642-default-rtdb.firebaseio.com',
+	  projectId: 'chat-app-dd642',
+	};
+	
+	// Initialize Firebase
+	const firebaseApp = initializeApp(firebaseConfig);
+  const db = getDatabase(firebaseApp);
+	const messagesRef = ref(db, 'messages');
+	const onlineUsersRef = ref(db, 'onlineUsers');
+	let messages = [];
+	let newMessage = '';
+	let senderName = ''; // Variable to store the sender's name
+  let messageContent = ''; // Variable to store the message content
+	let hasEnteredName = false; // Flag to track whether the user has entered their name
+  let onlineUsers = []; // Array to store the names of online users
+  let showModal = false;
+  let errorMessage = ''; // Variable to store the error message
 
 
-  :global(body) {
-    margin: 0;
-    font-family: Arial, sans-serif;
-    background-color: #f5f5f5;
+onMount(() => {
+  // Check for a user session in localStorage
+  const storedSenderName = localStorage.getItem('senderName');
+  if (storedSenderName) {
+    senderName = storedSenderName;
+    hasEnteredName = true;
+    // Fetch the chat messages and online users from localStorage if needed
+    // Example: messages = JSON.parse(localStorage.getItem('messages')) || [];
+    // Example: onlineUsers = JSON.parse(localStorage.getItem('onlineUsers')) || [];
+  } else {
+    // User has not joined the chat, so they should see the join chat screen
+    hasEnteredName = false;
+  }
+  });
+
+  
+	// Function to close the modal
+	const closeModal = () => {
+    showModal = false;
+  };
+
+  const sendMessage = () => {
+  if (senderName.trim() === '') {
+    // Prevent sending messages without a sender name
+    return;
   }
 
+  // Trim the message content to remove leading and trailing spaces
+  messageContent = messageContent.trim();
+
+  if (messageContent === '') {
+    // Prevent sending empty messages
+    return;
+  }
+
+  // Define the maximum allowed message content length (adjust as needed)
+  const maxMessageLength = 2;
+  if (messageContent.length > maxMessageLength) {
+    // Prevent sending excessively long messages
+    // Show the modal with the error message
+    showModal = true;
+    return;
+  }
+
+  const database = getDatabase();
+  const newMessageRef = push(ref(database, 'messages'), {
+    senderName,
+    messageContent,
+    timestamp: Date.now(),
+  });
+
+  // Add the new message to the local messages array
+  messages = [...messages, {
+    senderName,
+    messageContent,
+    timestamp: Date.now(),
+  }];
+
+  messageContent = ''; // Clear the message content after sending
+};
+
+
+onMount(() => {
+	  onValue(messagesRef, (snapshot) => {
+		messages = Object.values(snapshot.val() || {});
+	  });
+  
+	  onValue(onlineUsersRef, (snapshot) => {
+		onlineUsers = Object.values(snapshot.val() || {});
+		
+	  });
+	});
+  // Function to show a notification
+  const showNotification = (message) => {
+    if (!('Notification' in window)) {
+      console.log('Notifications not supported by your browser.');
+      return;
+    }
+
+    // Request permission to show notifications (required by some browsers)
+    Notification.requestPermission().then((permission) => {
+      if (permission === 'granted') {
+        const notification = new Notification('New Message', {
+          body: `${message.senderName}: ${message.messageContent}`,
+        });
+        notification.onclick = () => {
+          // Handle the click event if the user clicks on the notification
+          // For example, you can redirect the user to the chat window or bring it to focus.
+        };
+      }
+    });
+  };
+
+  // Function to handle incoming messages
+  const handleIncomingMessages = () => {
+    const database = getDatabase();
+    onValue(ref(database, 'messages'), (snapshot) => {
+      if (snapshot.exists()) {
+        const data = snapshot.val();
+        messages = Object.keys(data).map((key) => data[key]);
+
+        // Filter out messages with undefined sender names or message content
+        messages = messages.filter((message) => message.senderName && message.messageContent);
+
+        // Check if the user is actively viewing the chat
+        const isUserViewingChat = document.hasFocus();
+        
+        // Show a notification only if the user is not actively viewing the chat
+        if (!isUserViewingChat) {
+          // Get the latest message
+          const latestMessage = messages[messages.length - 1];
+          showNotification(latestMessage);
+        }
+      }
+    });
+  };
+  onMount(() => {
+    handleIncomingMessages();
+  });
 
  
-
-  @keyframes slide-up {
-    from {
-      transform: translateY(50px);
-      opacity: 0;
-    }
-    to {
-      transform: translateY(0);
-      opacity: 1;
+  const enterChat = () => {
+    if (senderName.trim().length >= 5) {
+      const userExists = onlineUsers.some((user) => user.senderName === senderName);
+      if (!userExists) {
+        push(onlineUsersRef, { senderName }).then(() => {
+          hasEnteredName = true; // Set the flag to indicate the user joined the chat
+          // Save the user's name in local storage
+          localStorage.setItem('senderName', senderName);
+        });
+      } else {
+        hasEnteredName = true; // Set the flag to indicate the user joined the chat
+        console.log("User already exists");
+        // Save the user's name in local storage
+        localStorage.setItem('senderName', senderName);
+      }
+    } else {
+      errorMessage = "Name should have at least 5 characters"; // Set the error message
     }
   }
 
 
-  
+   // Function to handle the user leaving the chat
+   const leaveChat = () => {
+    hasEnteredName = false;
+    onlineUsers = onlineUsers.filter((user) => user !== senderName); // Remove the user from the online users list
+  };
 
-  
+   // Function to handle the user sending a new message
+   const handleSubmit = () => {
+    if (newMessage.trim() !== '') {
+      const database = getDatabase();
+      const newMessageRef = push(ref(database, 'messages'), {
+        senderName: senderName, // Use the senderName from the existing code
+        messageContent: newMessage, // Use the newMessage variable
+        timestamp: Date.now(),
+      });
 
-  .chat-box {
+      newMessage = ''; // Clear the input box after sending the message
+    }
+  };
+  
+</script>
+
+
+<main>
+  <h1>CHAT-APP</h1>
+
+  {#if !hasEnteredName}
+    <div class="input-box">
+      <Input bind:value="{senderName}" placeholder=" Enter Your Name" />
+      <Button style='background-color:purple' on:click="{enterChat}">Join</Button>
+    </div>
+    {#if errorMessage}
+      <p class="error-message">{errorMessage}</p> <!-- Display the error message -->
+    {/if}
+  {:else}
+  <div class="top-right">
+    <Button style='background-color:red; color:white;' on:click="{leaveChat}">Logout</Button>
+  </div>
+  <div class="chat-container">
+    <div class="user-list">
+      <h3>Online Users:</h3>
+      {#each onlineUsers as user}
+      <p style="color: black;margin-left:40px;" class="username"  >{user.senderName}</p>
+      {/each}
+    </div>
+
+    <div class="chat-box">
+      {#each messages as message}
+      <div class="message {message.senderName === senderName ? 'sent' : 'received'}">
+          <p class="message-sender">{message.senderName}:</p>
+          <p class="message-content">{message.messageContent}</p>
+          <p class="message-timestamp">
+            ({new Date(message.timestamp).toLocaleTimeString()})
+          </p>
+        </div>
+      {/each}
+
+      <div class="input-box">
+        <Input
+          type="text"
+          bind:value="{newMessage}"
+          placeholder="Type your message here..."
+          on:keyup="{(e) => e.key === 'Enter' && handleSubmit()}"
+        />
+        <Button style='background-color:blue' on:click="{handleSubmit}">Send</Button>
+      </div>
+    </div>
+  </div>
+  {/if}
+
+  {#if showModal}
+    <!-- Replace modal content -->
+    <Modal on:close="{closeModal}">
+      <div slot="header">Error</div>
+      <div slot="body" class="modal-content">
+        <p class="error-message">
+          {#if senderName.trim() === ''}
+            Please enter your name.
+          {:else}
+            {#if messageContent.trim() === ''}
+              Please enter a message.
+            {:else}
+              Message exceeds the maximum length.
+            {/if}
+          {/if}
+        </p>
+        <Button slot="footer" class="modal-close-btn" on:click="{closeModal}">OK</Button>
+      </div>
+    </Modal>
+  {/if}
+</main>
+
+<style>
+    .message.sent {
+    align-self: flex-end;
+    background-color: lightgreen; 
+  }
+
+  .message.received {
+    align-self: flex-start;
+    background-color: lightgoldenrodyellow; 
+  }
+  .top-right {
+  position: absolute;
+  top: 0px;
+  right: 10px;
+}
+  main {
+    max-width: 100%;
+    margin: 0;
     display: flex;
     flex-direction: column;
+    height: 100vh;
+  }
+
+  h1 {
+    text-align: center;
+    margin: 0;
     padding: 10px;
+    background-color: #075e54;
+    color: white;
+  }
+
+  .chat-container {
     flex: 1;
-    max-height: calc(100vh - 200px); /* Adjust this value to leave space for the user-list and input-box */
+    display: flex;
+    background-color: #f0f0f0;
+  }
+
+  .user-list {
+    padding: 20px;
+    min-width: 250px;
+    max-width: 250px;
+    background-color: #075e54;
+    color: white;
     overflow-y: auto;
   }
 
-  .message {
-    background-color: #f5f5f5;
-    border-radius: 8px;
-    padding: 10px;
+  .user-list h3 {
+    margin: 0;
     margin-bottom: 10px;
-    animation: fade-in 0.3s;
+    font-size: 18px;
   }
 
-  @keyframes fade-in {
-    from {
-      opacity: 0;
-    }
-    to {
-      opacity: 1;
-    }
+  .chat-box {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    padding: 20px;
+    background-color: #f0f0f0;
+    overflow-y: auto;
+    max-width: 80%; /* Increase the max-width to your desired width (e.g., 80%) */
+    margin: 0 auto; /* Center the chatbox horizontally */
+  }
+
+
+  .message {
+    max-width: 70%;
+    margin-bottom: 20px;
+    padding: 10px;
+    border-radius: 10px;
+    background-color: #fff;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
   }
 
   .message p {
     margin: 0;
+    font-size: 16px;
   }
 
   .message-sender {
-    color: #007bff;
+    color: #075e54;
     font-weight: bold;
   }
 
@@ -114,7 +353,24 @@
     font-size: 12px;
   }
 
+  .input-box {
+    display: flex;
+    align-items: center;
+    background-color: #fff;
+    border-top: 1px solid #ccc;
+    padding: 10px;
+  }
+
+  .modal-content {
+    background-color: #fff;
+    padding: 20px;
+    border-radius: 4px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    max-width: 400px;
+  }
+
+  .error-message {
+    color: red;
+    font-weight: bold;
+  }
 </style>
-
-
-  
