@@ -208,11 +208,16 @@ onMount(() => {
     <Button style='background-color:red; color:white;' on:click="{leaveChat}">Logout</Button>
   </div>
   <div class="chat-container">
-    <div class="user-list">
+    <div class="online-users">
       <h3>Online Users:</h3>
-      {#each onlineUsers as user}
-      <p style="color: black;margin-left:40px;" class="username"  >{user.senderName}</p>
-      {/each}
+      <ul>
+        {#each onlineUsers as user (user.senderName)}
+          <li class="online-user">
+            <i class="fas fa-user"></i> {user.senderName}
+          </li>
+        {/each}
+      </ul>
+  
     </div>
 
     <div class="chat-box">
@@ -298,21 +303,44 @@ onMount(() => {
     background-color: #f0f0f0;
   }
 
-  .user-list {
-    padding: 20px;
+  .online-users {
     min-width: 250px;
     max-width: 250px;
     background-color: #075e54;
     color: white;
     overflow-y: auto;
+    padding: 20px;
   }
 
-  .user-list h3 {
+  .online-users h3 {
     margin: 0;
     margin-bottom: 10px;
     font-size: 18px;
   }
 
+  .online-users ul {
+    list-style-type: none;
+    padding: 0;
+  }
+
+  .online-user {
+    margin: 0;
+    margin-bottom: 5px;
+    font-size: 16px;
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+    transition: background-color 0.2s;
+  }
+
+  .online-user i {
+    margin-right: 8px;
+    font-size: 16px;
+  }
+
+  .online-user:hover {
+    background-color: #128c7e; /* Change background color on hover */
+  }
   .chat-box {
     flex: 1;
     display: flex;
