@@ -21,10 +21,10 @@
 	let messages = [];
 	let newMessage = '';
 	let senderName = ''; // Variable to store the sender's name
-    let messageContent = ''; // Variable to store the message content
+  let messageContent = ''; // Variable to store the message content
 	let hasEnteredName = false; // Flag to track whether the user has entered their name
-    let onlineUsers = []; // Array to store the names of online users
-    let showModal = false;
+  let onlineUsers = []; // Array to store the names of online users
+  let showModal = false;
 
 	// Function to close the modal
 	const closeModal = () => {
@@ -187,6 +187,7 @@
         />
         <Button style='background-color:blue' on:click="{handleSubmit}">Send</Button>
       </div>
+      <Button style='background-color:red; color:white;' on:click="{leaveChat}">Logout</Button>
     </div>
   </div>
   {/if}
